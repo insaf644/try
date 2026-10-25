@@ -1,0 +1,214 @@
+import os, zipfile, textwrap
+
+base = "/mnt/data/insaf_secret_world"
+os.makedirs(base, exist_ok=True)
+
+html = r'''<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5efe5">
+<title>Between the Lines — عالم إنصاف</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap');
+:root{--paper:#f5efe5;--paper2:#eee3d3;--ink:#30271f;--muted:#786a5c;--brown:#795b43;--gold:#b18a55;--line:#d9c9b5;--white:#fffaf3;--shadow:0 20px 55px #59452b12}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans','Amiri',sans-serif;line-height:1.7;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;z-index:-1;background-image:radial-gradient(#8d755a .6px,transparent .6px);background-size:7px 7px}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}
+.topline{height:4px;background:linear-gradient(90deg,#795b43,#d4b47e,#795b43)}
+nav{max-width:1200px;margin:auto;padding:24px 6%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:2px;direction:ltr}
+.seal{width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;font-family:'Playfair Display';font-size:20px;color:var(--brown);position:relative}
+.seal:after{content:"";position:absolute;inset:4px;border:1px solid #b18a5577;border-radius:50%}
+.navlinks{display:flex;gap:24px;font-size:12px;color:var(--muted)}
+.navlinks a:hover{color:var(--brown)}
+.lang{border:1px solid var(--line);background:transparent;border-radius:99px;padding:7px 13px;color:var(--brown);font-size:11px}
+.hero{max-width:1200px;margin:25px auto 90px;padding:40px 6% 0;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:55px;min-height:500px}
+.eyebrow{font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;direction:ltr;text-align:right}
+h1{font-family:'Amiri',serif;font-weight:400;font-size:clamp(43px,6vw,78px);line-height:1.3;margin:18px 0 16px;letter-spacing:-1px}
+h1 em{font-family:'Playfair Display',serif;font-weight:500;color:var(--brown);font-size:.75em;display:block;direction:ltr;text-align:right}
+.lead{max-width:490px;color:var(--muted);font-size:15px;line-height:2.1}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{border:1px solid var(--brown);background:var(--brown);color:var(--white);padding:12px 20px;border-radius:2px;font-size:12px;transition:.25s}
+.btn:hover{background:#4d392a;transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--brown);border-color:var(--line)}
+.hero-art{position:relative;min-height:390px;display:grid;place-items:center}
+.orbit{width:min(100%,380px);aspect-ratio:1;border:1px solid #cbb79b;border-radius:50%;position:relative;display:grid;place-items:center}
+.orbit:before,.orbit:after{content:"";position:absolute;border:1px solid #d9c9b5;border-radius:50%;inset:26px}
+.orbit:after{inset:56px;border-style:dashed;opacity:.7}
+.monogram{width:180px;height:225px;background:linear-gradient(145deg,#e6d4ba,#c4a47c);clip-path:polygon(50% 0,91% 19%,84% 76%,50% 100%,16% 76%,9% 19%);display:grid;place-items:center;color:#fff7e9;font-family:'Playfair Display';font-size:75px;text-shadow:0 5px 18px #59452b33;position:relative}
+.monogram:after{content:"I";position:absolute;font-style:italic}
+.float-note{position:absolute;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow);padding:12px 16px;font-size:11px;color:var(--muted);max-width:170px}
+.note-one{top:14%;right:-2%}.note-two{bottom:10%;left:-2%}
+.tiny-star{position:absolute;color:var(--gold);font-size:21px}.s1{top:9%;left:26%}.s2{bottom:16%;right:19%}
+.section{max-width:1200px;margin:0 auto;padding:35px 6% 85px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:30px}
+.kicker{font-size:10px;letter-spacing:2.5px;color:var(--gold);direction:ltr}
+h2{font-family:'Amiri',serif;font-weight:400;font-size:37px;line-height:1.35;margin:6px 0}
+.section-head p{font-size:12px;color:var(--muted);max-width:330px;margin:0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{min-height:225px;border:1px solid var(--line);padding:25px;background:#f8f2e9;position:relative;overflow:hidden;transition:.3s;cursor:pointer}
+.card:hover{transform:translateY(-5px);box-shadow:var(--shadow);background:var(--white)}
+.card-no{font-size:10px;color:var(--gold);letter-spacing:2px;direction:ltr}
+.card-symbol{font-family:'Playfair Display';font-size:40px;color:#b59a78;line-height:1.3;margin:13px 0}
+.card h3{font-family:'Amiri';font-size:24px;font-weight:400;margin:0 0 7px}
+.card p{font-size:12px;color:var(--muted);margin:0;line-height:1.9}
+.card .arrow{position:absolute;left:22px;bottom:20px;color:var(--gold);font-size:18px}
+.manifesto{background:#e9dece;border-block:1px solid var(--line);padding:75px 6%;text-align:center;position:relative}
+.manifesto blockquote{max-width:760px;margin:18px auto;font-family:'Amiri';font-size:clamp(26px,4vw,43px);line-height:1.8}
+.manifesto small{color:var(--muted);font-size:11px;letter-spacing:1px}
+.journal-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:40px;align-items:start}
+.journal-intro{position:sticky;top:20px}
+.journal-intro p{color:var(--muted);font-size:13px;line-height:2}
+.prompt{border:1px solid var(--line);background:var(--white);padding:23px;margin-bottom:12px}
+.prompt label{font-size:10px;letter-spacing:2px;color:var(--gold);direction:ltr;display:block}
+.prompt h3{font-family:'Amiri';font-size:22px;font-weight:400;margin:8px 0}
+textarea{width:100%;min-height:100px;resize:vertical;border:1px solid var(--line);background:#fbf7f0;padding:12px;color:var(--ink);font:13px/1.8 'DM Sans','Amiri',sans-serif;outline:none}
+textarea:focus{border-color:var(--gold)}
+.save-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+.save-row span{font-size:11px;color:var(--muted)}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{border:1px solid var(--line);padding:7px 12px;border-radius:99px;font-size:11px;color:var(--brown);background:transparent}
+.pill.active,.pill:hover{background:var(--brown);color:white;border-color:var(--brown)}
+.reading{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.book{padding:22px;background:var(--white);border:1px solid var(--line);min-height:185px}
+.book-cover{height:75px;width:54px;background:linear-gradient(140deg,#8b6d51,#c6a77e);margin-bottom:13px;box-shadow:4px 4px 0 #d9c9b5;display:grid;place-items:center;color:#f8efe2;font-family:'Playfair Display';font-size:23px}
+.book:nth-child(2) .book-cover{background:linear-gradient(140deg,#5c6254,#a8a58b)}
+.book:nth-child(3) .book-cover{background:linear-gradient(140deg,#9d7d75,#d6b4a3)}
+.book:nth-child(4) .book-cover{background:linear-gradient(140deg,#454e5c,#9ea6ae)}
+.book strong{font-family:'Amiri';font-size:20px;font-weight:400;display:block}
+.book small{color:var(--muted);font-size:11px}
+footer{background:#30271f;color:#f5efe5;padding:38px 6%;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+footer .footer-brand{font-family:'Playfair Display';font-size:18px;direction:ltr}
+footer p{font-size:11px;color:#c9b9a5;margin:4px 0}
+.modal{position:fixed;inset:0;background:#1e1712a8;display:none;place-items:center;padding:20px;z-index:10}
+.modal.open{display:grid}
+.modal-box{max-width:520px;width:100%;background:var(--paper);border:1px solid var(--gold);padding:30px;position:relative;box-shadow:0 30px 100px #0003}
+.close{position:absolute;left:16px;top:12px;border:0;background:none;font-size:23px;color:var(--brown)}
+.modal-box h2{font-size:30px}.modal-box p{color:var(--muted);line-height:2;font-size:14px}
+.modal-mark{font-family:'Playfair Display';font-size:40px;color:var(--gold)}
+.toast{position:fixed;bottom:20px;left:20px;background:#30271f;color:#fffaf3;padding:12px 18px;font-size:12px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:20}
+.toast.show{opacity:1;transform:translateY(0)}
+[dir="ltr"] .eyebrow,[dir="ltr"] .kicker{text-align:left}
+@media(max-width:760px){nav{padding:18px 5%}.navlinks{display:none}.hero{grid-template-columns:1fr;margin:5px auto 50px;padding:25px 6%;gap:15px}.hero-art{min-height:300px;grid-row:1}.orbit{width:280px}.monogram{width:135px;height:170px;font-size:55px}.note-one{right:0}.note-two{left:0}.cards{grid-template-columns:1fr}.card{min-height:190px}.section{padding:25px 6% 60px}.section-head{display:block}.section-head p{margin-top:10px}.journal-layout{grid-template-columns:1fr}.journal-intro{position:static}.reading{grid-template-columns:1fr 1fr}.manifesto{padding:55px 7%}footer{display:block}footer p{margin-top:10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<nav>
+  <a class="brand" href="#home" aria-label="Between the Lines home"><span class="seal">I.</span><span>BETWEEN THE LINES<br><small style="color:var(--muted);letter-spacing:1px">A PRIVATE UNIVERSE</small></span></a>
+  <div class="navlinks"><a href="#worlds" data-ar="عوالم صغيرة" data-en="Little worlds">عوالم صغيرة</a><a href="#journal" data-ar="دفتر خاص" data-en="Private journal">دفتر خاص</a><a href="#library" data-ar="مكتبة الأفكار" data-en="Idea library">مكتبة الأفكار</a></div>
+  <button class="lang" id="langBtn">EN / AR</button>
+</nav>
+
+<main id="home">
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow" data-ar="ملاحظات من عقل لا يتوقف عن السؤال" data-en="NOTES FROM A MIND THAT KEEPS ASKING">ملاحظات من عقل لا يتوقف عن السؤال</div>
+    <h1 data-ar="لستُ فكرةً واحدة." data-en="I was never one thing.">لستُ فكرةً واحدة.<em>And that's the point.</em></h1>
+    <p class="lead" data-ar="مكان صغير للأجزاء التي لا تجتمع عادةً في سيرة واحدة: عقل يحبّ أن يفهم، قلب يبحث عن الطمأنينة، وفضول يفتح بابًا جديدًا كلما ظننتُ أنني وصلت." data-en="A small place for the parts that rarely fit into one biography: a mind that wants to understand, a heart looking for steadiness, and a curiosity that opens another door just when I think I've arrived.">مكان صغير للأجزاء التي لا تجتمع عادةً في سيرة واحدة: عقل يحبّ أن يفهم، قلب يبحث عن الطمأنينة، وفضول يفتح بابًا جديدًا كلما ظننتُ أنني وصلت.</p>
+    <div class="hero-actions"><a class="btn" href="#worlds" data-ar="ادخلي عالمي" data-en="Enter my world">ادخلي عالمي</a><a class="btn ghost" href="#journal" data-ar="اكتبي لنفسك" data-en="Write for yourself">اكتبي لنفسك</a></div>
+  </div>
+  <div class="hero-art" aria-label="Abstract monogram artwork">
+    <div class="orbit"><div class="monogram"></div><span class="tiny-star s1">✳</span><span class="tiny-star s2">✦</span></div>
+    <div class="float-note note-one" data-ar="الهدوء ليس غياب الطموح." data-en="Softness is not the absence of ambition.">الهدوء ليس غياب الطموح.</div>
+    <div class="float-note note-two" data-ar="فكّري بعمق. عيشي بلطف." data-en="Think deeply. Live gently.">فكّري بعمق. عيشي بلطف.</div>
+  </div>
+</section>
+
+<section class="section" id="worlds">
+  <div class="section-head"><div><div class="kicker">THE INNER ATLAS / 01</div><h2 data-ar="عوالم تسكنني" data-en="Worlds I carry">عوالم تسكنني</h2></div><p data-ar="ليست اهتمامات متفرقة؛ إنها طرق مختلفة للنظر إلى العالم." data-en="Not scattered interests. Different ways of looking at the world.">ليست اهتمامات متفرقة؛ إنها طرق مختلفة للنظر إلى العالم.</p></div>
+  <div class="cards">
+    <article class="card" data-world="law"><span class="card-no">01 — JUSTICE</span><div class="card-symbol">§</div><h3 data-ar="العدالة، لا الضجيج" data-en="Justice, not noise">العدالة، لا الضجيج</h3><p data-ar="أبحث عن السؤال الصحيح قبل الإجابة السهلة. الحقيقة تستحقّ عقلًا صبورًا." data-en="The right question before the easy answer. Truth deserves a patient mind.">أبحث عن السؤال الصحيح قبل الإجابة السهلة. الحقيقة تستحقّ عقلًا صبورًا.</p><span class="arrow">↙</span></article>
+    <article class="card" data-world="mind"><span class="card-no">02 — HUMAN NATURE</span><div class="card-symbol">◌</div><h3 data-ar="ما وراء التصرفات" data-en="Beneath behaviour">ما وراء التصرفات</h3><p data-ar="لماذا نفعل ما نفعل؟ الفضول هنا ليس حكمًا على الناس، بل محاولة لفهمهم." data-en="Why do we do what we do? Curiosity as an attempt to understand, not judge.">لماذا نفعل ما نفعل؟ الفضول هنا ليس حكمًا على الناس، بل محاولة لفهمهم.</p><span class="arrow">↙</span></article>
+    <article class="card" data-world="books"><span class="card-no">03 — THE WRITTEN WORLD</span><div class="card-symbol">“ ”</div><h3 data-ar="حياة بين السطور" data-en="A life between lines">حياة بين السطور</h3><p data-ar="بعض المشاعر لا تريد حلًا؛ تريد فقط جملةً تعرف كيف تحملها." data-en="Some feelings don't need a solution. They need a sentence that can hold them.">بعض المشاعر لا تريد حلًا؛ تريد فقط جملةً تعرف كيف تحملها.</p><span class="arrow">↙</span></article>
+    <article class="card" data-world="world"><span class="card-no">04 — ELSEWHERE</span><div class="card-symbol">⌁</div><h3 data-ar="العالم أوسع" data-en="The world is wider">العالم أوسع</h3><p data-ar="لغات جديدة، مدن بعيدة، وثقة تُبنى خطوةً خطوة. أحلم، ثم أبحث عن الطريق." data-en="New languages, distant cities, and confidence built one step at a time. Dream, then find the route.">لغات جديدة، مدن بعيدة، وثقة تُبنى خطوةً خطوة. أحلم، ثم أبحث عن الطريق.</p><span class="arrow">↙</span></article>
+    <article class="card" data-world="art"><span class="card-no">05 — QUIET BEAUTY</span><div class="card-symbol">✳</div><h3 data-ar="جمال له معنى" data-en="Beauty with meaning">جمال له معنى</h3><p data-ar="خطوط، ألوان، موسيقى وتفاصيل صغيرة تجعل الحياة أقل قسوة وأكثر شبهًا بي." data-en="Lines, colours, music, and small details that make life gentler and more like me.">خطوط، ألوان، موسيقى وتفاصيل صغيرة تجعل الحياة أقل قسوة وأكثر شبهًا بي.</p><span class="arrow">↙</span></article>
+    <article class="card" data-world="future"><span class="card-no">06 — THE MAKING</span><div class="card-symbol">↗</div><h3 data-ar="النسخة التي أبنيها" data-en="The self in progress">النسخة التي أبنيها</h3><p data-ar="لا أحتاج أن أصل إلى كل شيء اليوم. يكفيني أن أصنع شيئًا صغيرًا يخدم الغد." data-en="I don't need to reach everything today. I can make one small thing that serves tomorrow.">لا أحتاج أن أصل إلى كل شيء اليوم. يكفيني أن أصنع شيئًا صغيرًا يخدم الغد.</p><span class="arrow">↙</span></article>
+  </div>
+</section>
+
+<section class="manifesto">
+  <div class="kicker">A NOTE TO MY FUTURE SELF</div>
+  <blockquote data-ar="«لا أريد حياة تبدو مبهرة من الخارج فقط. أريد حياة أشعر أنها تخصّني، حتى في الأيام العادية.»" data-en="“I don't only want a life that looks impressive from the outside. I want a life that feels like mine, even on ordinary days.”">«لا أريد حياة تبدو مبهرة من الخارج فقط. أريد حياة أشعر أنها تخصّني، حتى في الأيام العادية.»</blockquote>
+  <small>— A THOUGHT WORTH KEEPING</small>
+</section>
+
+<section class="section" id="journal">
+  <div class="section-head"><div><div class="kicker">THE PRIVATE ROOM / 02</div><h2 data-ar="دفتر لا يطلب منك الترتيب" data-en="A journal with no perfect order">دفتر لا يطلب منك الترتيب</h2></div><p data-ar="لا يلزم أن تكوني واضحة طوال الوقت. اتركي الفكرة كما هي، ثم عودي إليها عندما تشائين." data-en="You don't have to be clear all the time. Leave a thought as it is, and return when you want.">لا يلزم أن تكوني واضحة طوال الوقت. اتركي الفكرة كما هي، ثم عودي إليها عندما تشائين.</p></div>
+  <div class="journal-layout">
+    <div class="journal-intro"><div class="modal-mark">✳</div><h2 data-ar="مساحة لكِ وحدك" data-en="A space that is yours">مساحة لكِ وحدك</h2><p data-ar="تُحفظ ملاحظاتك في هذا المتصفح فقط باستخدام التخزين المحلي. لا يوجد حساب ولا إرسال إلى خادم. إذا مسحتِ بيانات المتصفح فقد تفقدينها، لذلك احتفظي بنسخة من النصوص المهمة." data-en="Your notes stay in this browser using local storage. No account, no server upload. Clearing browser data may erase them, so keep a copy of anything important.">تُحفظ ملاحظاتك في هذا المتصفح فقط باستخدام التخزين المحلي. لا يوجد حساب ولا إرسال إلى خادم. إذا مسحتِ بيانات المتصفح فقد تفقدينها، لذلك احتفظي بنسخة من النصوص المهمة.</p><div class="pill-row"><button class="pill active" data-prompt="today" data-ar="اليوم" data-en="Today">اليوم</button><button class="pill" data-prompt="dream" data-ar="الحلم" data-en="The dream">الحلم</button><button class="pill" data-prompt="release" data-ar="ما أتركه" data-en="Letting go">ما أتركه</button></div></div>
+    <div>
+      <div class="prompt"><label id="promptLabel">TODAY'S PAGE</label><h3 id="promptTitle">ما الشيء الصغير الذي أريد أن أفعله لنفسي اليوم؟</h3><textarea id="journalText" placeholder="اكتبي دون أن تحكمي على كلماتك..."></textarea><div class="save-row"><span id="saveStatus">محفوظة على هذا الجهاز فقط</span><button class="btn" id="saveNote">احفظي الملاحظة</button></div></div>
+      <div class="prompt" style="background:transparent"><label>ONE GENTLE REMINDER</label><h3 data-ar="ليس كل تأخير فشلًا. أحيانًا أنتِ تتعلمين كيف تحملين أحلامك دون أن تحترقي." data-en="Not every delay is failure. Sometimes you're learning to carry your dreams without burning out.">ليس كل تأخير فشلًا. أحيانًا أنتِ تتعلمين كيف تحملين أحلامك دون أن تحترقي.</h3></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="library">
+  <div class="section-head"><div><div class="kicker">THE IDEA SHELF / 03</div><h2 data-ar="رفّ الأفكار التي تنتظر" data-en="Ideas waiting on the shelf">رفّ الأفكار التي تنتظر</h2></div><p data-ar="بعض الأشياء لا تُنجز دفعة واحدة؛ يكفي أن يبقى لها مكان." data-en="Some things aren't made all at once. It is enough to give them a place.">بعض الأشياء لا تُنجز دفعة واحدة؛ يكفي أن يبقى لها مكان.</p></div>
+  <div class="reading">
+    <div class="book"><div class="book-cover">01</div><strong data-ar="بيت المرايا" data-en="The Mirror House">بيت المرايا</strong><small data-ar="مشروع كتابة · مسودة قادمة" data-en="Writing project · in progress">مشروع كتابة · مسودة قادمة</small></div>
+    <div class="book"><div class="book-cover">02</div><strong data-ar="تحت علم واحد" data-en="Under One Flag">تحت علم واحد</strong><small data-ar="فكرة تستحقّ أن تكبر" data-en="An idea worth growing">فكرة تستحقّ أن تكبر</small></div>
+    <div class="book"><div class="book-cover">§</div><strong data-ar="القانون حين يلتقي الإنسان" data-en="Law meets the human">القانون حين يلتقي الإنسان</strong><small data-ar="أسئلة بحثية · أخلاق ومسؤولية" data-en="Research notes · ethics & responsibility">أسئلة بحثية · أخلاق ومسؤولية</small></div>
+    <div class="book"><div class="book-cover">↗</div><strong data-ar="أشياء أصنعها بنفسي" data-en="Things I build myself">أشياء أصنعها بنفسي</strong><small data-ar="مواقع، أفكار، واستقلال خطوة بخطوة" data-en="Websites, ideas, and independence step by step">مواقع، أفكار، واستقلال خطوة بخطوة</small></div>
+  </div>
+</section>
+</main>
+<footer><div><div class="footer-brand">BETWEEN THE LINES</div><p data-ar="عالم صغير، أفكار كثيرة، وخطوة واحدة في كل مرة." data-en="A small world, many ideas, one step at a time.">عالم صغير، أفكار كثيرة، وخطوة واحدة في كل مرة.</p></div><p>MADE OF CURIOSITY · © <span id="year"></span></p></footer>
+
+<div class="modal" id="worldModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-box"><button class="close" id="closeModal" aria-label="Close">×</button><div class="modal-mark" id="modalMark">§</div><div class="kicker" id="modalKicker">A LITTLE WORLD</div><h2 id="modalTitle"></h2><p id="modalText"></p><button class="btn" id="modalDone" data-ar="أعود إلى عالمي" data-en="Back to my world">أعود إلى عالمي</button></div></div>
+<div class="toast" id="toast">تم الحفظ</div>
+<script>
+const $=s=>document.querySelector(s);
+let language='ar';
+const worlds={
+law:{mark:'§',enTitle:'Justice, not noise',arTitle:'العدالة، لا الضجيج',en:'The law is more than articles and procedures. It is a promise that power should answer to principles, and that vulnerable people deserve to be heard. Keep asking: who is protected, who is responsible, and what would a fair solution look like?',ar:'القانون أكثر من مواد وإجراءات. إنه وعد بأن تخضع القوة للمبادئ، وأن يستحقّ الأشخاص الأكثر ضعفًا أن يُسمعوا. واصلي السؤال: من الذي نحميه؟ من يتحمّل المسؤولية؟ وكيف يبدو الحل العادل؟'},
+mind:{mark:'◌',enTitle:'Beneath behaviour',arTitle:'ما وراء التصرفات',en:'Curiosity about people can be a form of compassion. A behaviour may have a history, but understanding it does not mean excusing harm. Hold both truths: be curious, and keep your boundaries.',ar:'قد يكون الفضول تجاه الناس شكلًا من أشكال الرحمة. ربما لكل تصرّف تاريخ، لكن فهمه لا يعني تبرير الأذى. احتفظي بالحقيقتين معًا: كوني فضولية، وحافظي على حدودك.'},
+books:{mark:'“ ”',enTitle:'A life between lines',arTitle:'حياة بين السطور',en:'Stories can give shape to feelings we have not learned to name. You are allowed to write slowly, change the plot, leave a page unfinished, and begin again without calling the first attempt a failure.',ar:'قد تمنح القصص شكلًا لمشاعر لم نتعلم تسميتها بعد. يحقّ لك أن تكتبي ببطء، وأن تغيّري الحبكة، وأن تتركي صفحة غير مكتملة، ثم تبدئي من جديد دون تسمية المحاولة الأولى فشلًا.'},
+world:{mark:'⌁',enTitle:'The world is wider',arTitle:'العالم أوسع',en:'A future in another city or language is not built in one leap. It is built through small proofs: one skill learned, one application sent, one brave question asked. Let the dream be big and the next step be practical.',ar:'المستقبل في مدينة أو لغة أخرى لا يُبنى بقفزة واحدة، بل بأدلة صغيرة: مهارة تتعلمينها، طلب ترسلينه، وسؤال شجاع تطرحينه. دعي الحلم كبيرًا، والخطوة القادمة عملية.'},
+art:{mark:'✳',enTitle:'Beauty with meaning',arTitle:'جمال له معنى',en:'Beauty does not have to be loud to be memorable. A thoughtful colour, a line of music, a well-made page, a quiet room: details can be a way of telling the world what matters to you.',ar:'ليس على الجمال أن يكون صاخبًا كي يُتذكّر. لون مدروس، لحن، صفحة متقنة، غرفة هادئة؛ قد تكون التفاصيل طريقة لإخبار العالم بما يهمّك.'},
+future:{mark:'↗',enTitle:'The self in progress',arTitle:'النسخة التي أبنيها',en:'You do not have to become every version of yourself at once. Choose a few priorities for this season. Rest is not a betrayal of ambition; it is part of making your work last.',ar:'لا تحتاجين إلى أن تصبحي كل نسخك في وقت واحد. اختاري أولويات قليلة لهذه المرحلة. الراحة ليست خيانة للطموح؛ إنها جزء من جعله قابلًا للاستمرار.'}
+};
+document.querySelectorAll('.card').forEach(card=>card.addEventListener('click',()=>{
+ const w=worlds[card.dataset.world];$('#modalMark').textContent=w.mark;$('#modalTitle').textContent=language==='ar'?w.arTitle:w.enTitle;$('#modalText').textContent=language==='ar'?w.ar:w.en;$('#modalKicker').textContent=language==='ar'?'نافذة صغيرة إلى هذا العالم':'A LITTLE WINDOW INTO THIS WORLD';$('#worldModal').classList.add('open');
+}));
+function closeModal(){$('#worldModal').classList.remove('open')}
+$('#closeModal').onclick=closeModal;$('#modalDone').onclick=closeModal;$('#worldModal').addEventListener('click',e=>{if(e.target.id==='worldModal')closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+const prompts={
+today:{label:'TODAY’S PAGE',ar:'ما الشيء الصغير الذي أريد أن أفعله لنفسي اليوم؟',en:'What is one small thing I want to do for myself today?',key:'insaf_note_today'},
+dream:{label:'THE DREAM',ar:'لو لم أحتج إلى إثبات أي شيء لأحد، ماذا سأختار؟',en:'If I had nothing to prove to anyone, what would I choose?',key:'insaf_note_dream'},
+release:{label:'WHAT I RELEASE',ar:'ما الفكرة التي أتمنى أن أتوقف عن حملها معي؟',en:'What thought do I wish I could stop carrying?',key:'insaf_note_release'}
+};
+let currentPrompt='today';
+function loadPrompt(k){currentPrompt=k;const p=prompts[k];$('#promptLabel').textContent=p.label;$('#promptTitle').textContent=language==='ar'?p.ar:p.en;$('#journalText').value=localStorage.getItem(p.key)||'';document.querySelectorAll('[data-prompt]').forEach(b=>b.classList.toggle('active',b.dataset.prompt===k));$('#saveStatus').textContent=language==='ar'?'محفوظة على هذا الجهاز فقط':'Saved on this device only'}
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>loadPrompt(b.dataset.prompt)));
+$('#saveNote').addEventListener('click',()=>{localStorage.setItem(prompts[currentPrompt].key,$('#journalText').value);$('#saveStatus').textContent=language==='ar'?'تم الحفظ على هذا الجهاز ✓':'Saved on this device ✓';$('#toast').textContent=language==='ar'?'حُفظت ملاحظتك على هذا الجهاز 🤎':'Your note is saved on this device 🤎';$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2200)});
+$('#langBtn').addEventListener('click',()=>{
+ language=language==='ar'?'en':'ar';document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';$('#langBtn').textContent=language==='ar'?'EN / AR':'AR / EN';
+ document.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=el.dataset[language]);loadPrompt(currentPrompt);
+});
+$('#year').textContent=new Date().getFullYear();loadPrompt('today');
+</script>
+</body></html>'''
+
+readme = """# Between the Lines — عالم إنصاف
+
+موقع شخصي تفاعلي بملف واحد، بدون صور خارجية أو مكتبات JavaScript أو Backend.
+## المزايا
+- تصميم عربي RTL مع تبديل إلى الإنجليزية.
+- تصميم متجاوب للهاتف والكمبيوتر.
+- ست نوافذ تفاعلية للمواضيع.
+- دفتر ملاحظات يحفظ محليًا في المتصفح فقط عبر localStorage.
+- لا توجد صور مستخدمة في التصميم، ولا حاجة إلى مفاتيح API.
+- ملاحظة: الخطوط قد تُحمّل من Google Fonts عند توفر الإنترنت؛ الموقع يعمل بخطوط بديلة عند عدم توفرها.
+"""
+with open(os.path.join(base,"index.html"),"w",encoding="utf-8") as f:f.write(html)
+with open(os.path.join(base,"README.md"),"w",encoding="utf-8") as f:f.write(readme)
+zip_path="/mnt/data/between-the-lines-insaf.zip"
+with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+    z.write(os.path.join(base,"index.html"),"index.html")
+    z.write(os.path.join(base,"README.md"),"README.md")
+print(zip_path, os.path.getsize(zip_path), len(html))
